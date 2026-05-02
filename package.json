@@ -1,0 +1,23 @@
+{
+  "name": "api-kytalist",
+  "version": "1.0.0",
+  "description": "This is the Backend API for the Kytalist project",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kytalist/api-kytalist.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kytalist/api-kytalist/issues"
+  },
+  "homepage": "https://github.com/Kytalist/api-kytalist#readme",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}
