@@ -1,1 +1,111 @@
+# ---------- Dependencies ----------
 node_modules/
+.pnp
+.pnp.js
+.pnp.cjs
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+jspm_packages/
+
+# ---------- Environment / secrets ----------
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Common secret files
+*.pem
+*.key
+*.crt
+
+# ---------- Build output ----------
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ---------- Prisma ----------
+# Generated client (your generator outputs to repo-root /generated)
+/generated/
+
+# Prisma local dev database
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# DO NOT ignore prisma/migrations/ — those MUST be committed.
+
+# ---------- Supabase CLI ----------
+supabase/.branches
+supabase/.temp
+supabase/.env
+
+# ---------- Logs ----------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ---------- Test / coverage ----------
+coverage/
+*.lcov
+.nyc_output/
+.vitest-cache/
+.jest-cache/
+
+# ---------- Caches ----------
+.npm
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache/
+.turbo/
+.swc/
+.rollup.cache/
+
+# ---------- Tooling ----------
+# mise (you have mise.toml in repo)
+.mise.local.toml
+.tool-versions.local
+
+# direnv
+.envrc.local
+
+# ---------- Editors / IDEs ----------
+# VSCode / Cursor — keep shared workspace settings, ignore personal
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# JetBrains
+.idea/
+*.iml
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+.\#*
+
+# ---------- OS files ----------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ---------- Misc ----------
+*.tgz
+.history/
