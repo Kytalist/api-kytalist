@@ -1,22 +1,17 @@
 import type { Listing, Prisma } from "../../generated/prisma/client.js";
-import {
-  CostOption,
-  ExtracurricularType,
-  ListingCategory,
-} from "../../generated/prisma/enums.js";
+import { ExtracurricularType } from "../../generated/prisma/enums.js";
 import { AppError } from "../domain/AppError.js";
 import type {
-  CostOptionDto,
-  ExtracurricularTypeDto,
   ListingJson,
   ListListingsQuery,
   ListingsSort,
 } from "../domain/listing.dto.js";
 import { ListingRepository } from "../repositories/listingRepository.js";
 
-const LISTING_CATEGORIES = new Set<string>(Object.values(ListingCategory));
-const EXTRACURRICULAR_TYPES = new Set<string>(Object.values(ExtracurricularType));
-const COST_OPTIONS = new Set<string>(Object.values(CostOption));
+export type ListResult = {
+  items: ListingJson[];
+  total: number;
+};
 
 /**
  * Business logic: filters, sorting, DTO mapping (tier 2).
@@ -26,6 +21,11 @@ export class ListingService {
 
   async listFeatured(): Promise<ListingJson[]> {
     const rows = await this.repo.findFeatured();
+    return rows.map((r) => toListingJson(r));
+  }
+
+  async listTrending(): Promise<ListingJson[]> {
+    const rows = await this.repo.findTrending();
     return rows.map((r) => toListingJson(r));
   }
 
@@ -40,34 +40,16 @@ export class ListingService {
     return toListingJson(row);
   }
 
-  async list(query: ListListingsQuery): Promise<ListingJson[]> {
+  async list(query: ListListingsQuery): Promise<ListResult> {
     const where = buildWhere(query);
-    const rows = await this.repo.findMany(where);
-    const sorted = sortListings(rows, query.sort);
-    return sorted.slice(query.offset, query.offset + query.limit).map(toListingJson);
-  }
-
-  parseListQuery(raw: Record<string, string | undefined>): ListListingsQuery {
-    const category = parseCategory(raw["category"]);
-    const region = parseRegion(raw["region"]);
-    const type = parseExtracurricularType(raw["type"]);
-    const cost = parseCost(raw["cost"]);
-    const grade = parseGrade(raw["grade"]);
-    const q = raw["q"]?.trim() || undefined;
-    const sort = parseSort(raw["sort"]);
-    const limit = parseLimit(raw["limit"]);
-    const offset = parseOffset(raw["offset"]);
-    return {
-      category,
-      region,
-      type,
-      cost,
-      grade,
-      q,
-      sort,
-      limit,
-      offset,
-    };
+    const orderBy = sortToOrderBy(query.sort);
+    const { rows, total } = await this.repo.findManyWithCount({
+      where,
+      take: query.limit,
+      skip: query.offset,
+      orderBy,
+    });
+    return { items: rows.map(toListingJson), total };
   }
 }
 
@@ -123,28 +105,17 @@ function extracurricularTypeFromSearch(
   return hit ? { equals: hit } : undefined;
 }
 
-function sortListings(rows: Listing[], sort: ListingsSort): Listing[] {
-  const copy = [...rows];
-  if (sort === "alpha") {
-    copy.sort((a, b) => a.title.localeCompare(b.title));
-    return copy;
-  }
-  if (sort === "recent") {
-    copy.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    return copy;
-  }
-  copy.sort((a, b) => {
-    const aHas = a.deadline || a.deadlineAt ? 0 : 1;
-    const bHas = b.deadline || b.deadlineAt ? 0 : 1;
-    if (aHas !== bHas) return aHas - bHas;
-    const aKey = a.deadlineAt?.getTime() ?? String(a.deadline ?? "");
-    const bKey = b.deadlineAt?.getTime() ?? String(b.deadline ?? "");
-    if (typeof aKey === "number" && typeof bKey === "number") {
-      return aKey - bKey;
-    }
-    return String(aKey).localeCompare(String(bKey));
-  });
-  return copy;
+function sortToOrderBy(
+  sort: ListingsSort,
+):
+  | Prisma.ListingOrderByWithRelationInput
+  | Prisma.ListingOrderByWithRelationInput[] {
+  if (sort === "alpha") return { title: "asc" };
+  if (sort === "recent") return { createdAt: "desc" };
+  return [
+    { deadlineAt: { sort: "asc", nulls: "last" } },
+    { deadline: { sort: "asc", nulls: "last" } },
+  ];
 }
 
 export function toListingJson(row: Listing): ListingJson {
@@ -166,69 +137,4 @@ export function toListingJson(row: Listing): ListingJson {
   if (row.grades.length > 0) base.grades = [...row.grades];
   if (row.tags.length > 0) base.tags = [...row.tags];
   return base;
-}
-
-function parseCategory(raw: string | undefined): ListListingsQuery["category"] {
-  if (raw === undefined || raw === "") return "all";
-  if (raw === "all") return "all";
-  if (!LISTING_CATEGORIES.has(raw)) {
-    throw new AppError(`Invalid category: ${raw}`, 400, "BAD_REQUEST");
-  }
-  return raw as ListListingsQuery["category"];
-}
-
-function parseRegion(raw: string | undefined): string | undefined {
-  if (!raw || raw === "All regions") return undefined;
-  return raw;
-}
-
-function parseExtracurricularType(
-  raw: string | undefined,
-): ExtracurricularTypeDto | undefined {
-  if (!raw || raw === "All") return undefined;
-  if (!EXTRACURRICULAR_TYPES.has(raw)) {
-    throw new AppError(`Invalid type: ${raw}`, 400, "BAD_REQUEST");
-  }
-  return raw as ExtracurricularTypeDto;
-}
-
-function parseCost(raw: string | undefined): CostOptionDto | undefined {
-  if (!raw || raw === "Any cost") return undefined;
-  if (!COST_OPTIONS.has(raw)) {
-    throw new AppError(`Invalid cost: ${raw}`, 400, "BAD_REQUEST");
-  }
-  return raw as CostOptionDto;
-}
-
-function parseGrade(raw: string | undefined): number | undefined {
-  if (raw === undefined || raw === "") return undefined;
-  const n = Number(raw);
-  if (!Number.isInteger(n) || n < 9 || n > 12) {
-    throw new AppError(`Invalid grade: ${raw}`, 400, "BAD_REQUEST");
-  }
-  return n;
-}
-
-function parseSort(raw: string | undefined): ListingsSort {
-  if (raw === undefined || raw === "") return "deadline";
-  if (raw === "deadline" || raw === "alpha" || raw === "recent") return raw;
-  throw new AppError(`Invalid sort: ${raw}`, 400, "BAD_REQUEST");
-}
-
-function parseLimit(raw: string | undefined): number {
-  if (raw === undefined || raw === "") return 100;
-  const n = Number(raw);
-  if (!Number.isInteger(n) || n < 1 || n > 500) {
-    throw new AppError("limit must be an integer 1–500", 400, "BAD_REQUEST");
-  }
-  return n;
-}
-
-function parseOffset(raw: string | undefined): number {
-  if (raw === undefined || raw === "") return 0;
-  const n = Number(raw);
-  if (!Number.isInteger(n) || n < 0) {
-    throw new AppError("offset must be a non-negative integer", 400, "BAD_REQUEST");
-  }
-  return n;
 }

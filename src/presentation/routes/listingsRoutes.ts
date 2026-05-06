@@ -1,7 +1,17 @@
 import { Router } from "express";
+import {
+  listingIdParamsSchema,
+  listListingsQuerySchema,
+  type ListListingsQueryParsed,
+} from "../../domain/schemas/listings.js";
 import type { ListingService } from "../../services/listingService.js";
 import { asyncHandler } from "../asyncHandler.js";
-import { paramString, queryString } from "../queryUtils.js";
+import { ok } from "../respond.js";
+import {
+  getValidatedParams,
+  getValidatedQuery,
+  validate,
+} from "../validation.js";
 
 export function createListingsRouter(listingService: ListingService): Router {
   const r = Router();
@@ -10,29 +20,39 @@ export function createListingsRouter(listingService: ListingService): Router {
     "/featured",
     asyncHandler(async (_req, res) => {
       const data = await listingService.listFeatured();
-      res.json({ data });
+      ok(res, data);
+    }),
+  );
+
+  r.get(
+    "/trending",
+    asyncHandler(async (_req, res) => {
+      const data = await listingService.listTrending();
+      ok(res, data);
     }),
   );
 
   r.get(
     "/",
+    validate({ query: listListingsQuerySchema }),
     asyncHandler(async (req, res) => {
-      const raw: Record<string, string | undefined> = {};
-      for (const [k, v] of Object.entries(req.query)) {
-        raw[k] = queryString(v);
-      }
-      const query = listingService.parseListQuery(raw);
-      const data = await listingService.list(query);
-      res.json({ data });
+      const query = getValidatedQuery<ListListingsQueryParsed>(req);
+      const result = await listingService.list(query);
+      ok(res, result.items, {
+        total: result.total,
+        limit: query.limit,
+        offset: query.offset,
+      });
     }),
   );
 
   r.get(
     "/:id",
+    validate({ params: listingIdParamsSchema }),
     asyncHandler(async (req, res) => {
-      const id = paramString(req.params["id"]) ?? "";
+      const { id } = getValidatedParams<{ id: string }>(req);
       const data = await listingService.getById(id);
-      res.json({ data });
+      ok(res, data);
     }),
   );
 

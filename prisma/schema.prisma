@@ -7,10 +7,26 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  user
+  admin
+}
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  /// Mirrors Supabase `auth.users.id` (UUID).
+  id            String    @id
+  email         String    @unique
+  name          String?
+  role          UserRole  @default(user)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  authoredListings Listing[]
+  savedListings    SavedListing[]
+  applications     Application[]
+
+  @@index([role])
 }
 
 enum ListingCategory {
@@ -36,6 +52,12 @@ enum CostOption {
   Stipend
 }
 
+enum ListingStatus {
+  draft
+  published
+  archived
+}
+
 /// Student opportunity listing (activities, camps, internships).
 model Listing {
   id          String @id
@@ -58,11 +80,92 @@ model Listing {
   keywords    String                 @default("")
   /// Optional real deadline for sorting; display may still use `deadline` text.
   deadlineAt  DateTime?
-  featuredOrder Int?               @unique
+  featuredOrder Int?                 @unique
+  trendingOrder Int?                 @unique
+  status        ListingStatus        @default(published)
+  publishedAt   DateTime?
+  authorId      String?
+  author        User?                @relation(fields: [authorId], references: [id])
   createdAt   DateTime               @default(now())
   updatedAt   DateTime               @updatedAt
+
+  savedBy      SavedListing[]
+  applications Application[]
 
   @@index([category])
   @@index([region])
   @@index([createdAt])
+  @@index([status])
+  @@index([trendingOrder])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  before     Json?
+  after      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model Subscriber {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  /// pending | confirmed | unsubscribed
+  status         String    @default("pending")
+  confirmToken   String?   @unique
+  unsubToken     String    @unique
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([status])
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  role      String?
+  quote     String
+  avatar    String?
+  published Boolean  @default(false)
+  order     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model SavedListing {
+  userId    String
+  listingId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, listingId])
+  @@index([userId])
+}
+
+model Application {
+  id        String   @id @default(uuid())
+  userId    String
+  listingId String
+  /// draft | submitted | accepted | rejected
+  status    String   @default("draft")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([listingId])
 }
