@@ -7,8 +7,62 @@ datasource db {
   provider = "postgresql"
 }
 
-model User { 
-  id    Int     @id @default(autoincrement()) 
+model User {
+  id    Int     @id @default(autoincrement())
   email String  @unique
   name  String?
-} 
+}
+
+enum ListingCategory {
+  activity
+  camp
+  internship
+}
+
+enum ExtracurricularType {
+  Competition
+  Research
+  Program
+  Club
+  Volunteer
+  Leadership
+  Arts
+  STEM
+}
+
+enum CostOption {
+  Free
+  Paid
+  Stipend
+}
+
+/// Student opportunity listing (activities, camps, internships).
+model Listing {
+  id          String @id
+  title       String
+  org         String
+  location    String
+  region      String
+  description String
+  image       String
+  category    ListingCategory
+  badge       String
+  footer      String
+  /// Display deadline copy (e.g. "Applications due Feb 28").
+  deadline    String?
+  type        ExtracurricularType?
+  cost        CostOption?
+  grades      Int[]
+  tags        String[]
+  /// Space-joined tags for simple ILIKE search (kept in sync on write/seed).
+  keywords    String                 @default("")
+  /// Optional real deadline for sorting; display may still use `deadline` text.
+  deadlineAt  DateTime?
+  featuredOrder Int?               @unique
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  @@index([category])
+  @@index([region])
+  @@index([createdAt])
+}

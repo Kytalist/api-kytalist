@@ -8,7 +8,14 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "build": "tsc",
+    "db:generate": "prisma generate",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "repository": {
     "type": "git",
@@ -22,6 +29,7 @@
   },
   "homepage": "https://github.com/Kytalist/api-kytalist#readme",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
@@ -33,6 +41,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pg": "^8.20.0"
