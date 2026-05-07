@@ -2,6 +2,7 @@ import type { Listing, Prisma } from "../../generated/prisma/client.js";
 import { ExtracurricularType } from "../../generated/prisma/enums.js";
 import { AppError } from "../domain/AppError.js";
 import type {
+  AdminListingJson,
   ListingJson,
   ListListingsQuery,
   ListingsSort,
@@ -137,4 +138,19 @@ export function toListingJson(row: Listing): ListingJson {
   if (row.grades.length > 0) base.grades = [...row.grades];
   if (row.tags.length > 0) base.tags = [...row.tags];
   return base;
+}
+
+export function toAdminListingJson(row: Listing): AdminListingJson {
+  const base = toListingJson(row);
+  return {
+    ...base,
+    status: row.status as AdminListingJson["status"],
+    deadlineAt: row.deadlineAt?.toISOString() ?? null,
+    featuredOrder: row.featuredOrder ?? null,
+    trendingOrder: row.trendingOrder ?? null,
+    publishedAt: row.publishedAt?.toISOString() ?? null,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    authorId: row.authorId ?? null,
+  };
 }

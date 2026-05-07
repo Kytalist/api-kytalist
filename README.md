@@ -41,7 +41,8 @@ curl http://localhost:3001/health
 ## Prerequisites
 
 - Node.js **>= 20.6** (needed for native `--env-file` support and modern ESM)
-- A Supabase project with PostgreSQL provisioned (or any PostgreSQL for local-only dev)
+- **Local:** [Docker](https://docs.docker.com/get-docker/) (for `npx supabase start`) **or** any PostgreSQL for local-only dev
+- **Hosted:** a Supabase cloud project (or other Postgres) if you are not using the local stack
 
 ## Setup
 
@@ -53,30 +54,26 @@ npm install
 
 ### 1. Configure environment
 
-Copy the example file and fill in your database URLs:
+[`.env.example`](.env.example) is pre-filled for **local development** with the same Postgres URL and Supabase API keys that `npx supabase start` uses (public demo JWTs — safe for a local stack only). Copy it to `.env` and start the local Supabase services before migrating:
 
 ```bash
 cp .env.example .env
+npx supabase start
 ```
 
-Then edit `.env`:
+**Cloud / production:** replace `DATABASE_URL`, `DIRECT_URL`, and all `SUPABASE_*` values using your Supabase dashboard (**Project Settings → Database → Connection string** for the DB URLs). Use the **pooled** string for `DATABASE_URL` and the **direct** session string for `DIRECT_URL` in production.
+
+**Local overrides (optional):** copy [`.env.local.example`](.env.local.example) to `.env.local`. The app, Prisma CLI, and seed load **`.env` first**, then **`.env.local`** (same key in `.env.local` wins). `.env.local` is gitignored — use it for machine-only URLs or secrets without changing the shared template.
 
 ```env
-PORT=3001
-
-# Pooled connection — used by the application at runtime (e.g. Supabase port 6543, pgbouncer=true)
-DATABASE_URL=
-
-# Direct connection — used by the Prisma CLI for migrations (e.g. port 5432)
-DIRECT_URL=
-
-# Comma-separated allowed browser origins (set in production)
-CORS_ORIGIN=
+# Typical production shape (values from dashboard — do not use placeholders in real deploys)
+# DATABASE_URL=postgres://...pooler...:6543/postgres?pgbouncer=true
+# DIRECT_URL=postgres://...db...:5432/postgres
+# CORS_ORIGIN=https://your-site.com
+# DOCS_ENABLED=false
 ```
 
-Both Supabase URLs come from your dashboard: **Project Settings → Database → Connection string**.
-
-> Why two URLs? Prisma 7 + Supabase requires the pooled URL for app queries (Supavisor pgbouncer in transaction mode) and the direct URL for migrations (which need session-bound connections for advisory locks and DDL transactions). Mixing them causes `prisma migrate` to hang forever.
+> Why two URLs? Prisma 7 + Supabase requires the pooled URL for app queries (Supavisor pgbouncer in transaction mode) and the direct URL for migrations (which need session-bound connections for advisory locks and DDL transactions). Mixing them causes `prisma migrate` to hang forever. On a dev machine with **local** Postgres you can set both to the same URL, as in `.env.example`.
 
 ### 2. Generate the Prisma client and apply migrations
 

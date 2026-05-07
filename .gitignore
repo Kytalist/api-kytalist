@@ -13,6 +13,7 @@ jspm_packages/
 .env
 .env.*
 !.env.example
+!.env.local.example
 !.env.sample
 
 # Common secret files

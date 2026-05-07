@@ -1,4 +1,6 @@
-import "dotenv/config";
+import { loadEnv } from "./infrastructure/loadEnv.js";
+
+loadEnv();
 import { disconnectPrisma } from "./infrastructure/prisma.js";
 import { getLogger } from "./infrastructure/logger.js";
 import { createApp } from "./presentation/createApp.js";

@@ -1,18 +1,18 @@
 import type { Listing, Prisma } from "../../generated/prisma/client.js";
 import { ListingStatus } from "../../generated/prisma/enums.js";
 import { AppError } from "../domain/AppError.js";
-import type { ListingJson } from "../domain/listing.dto.js";
+import type { AdminListingJson } from "../domain/listing.dto.js";
 import type {
   AdminListListingsQuery,
   CreateListingBody,
   UpdateListingBody,
 } from "../domain/schemas/listingAdmin.js";
 import { ListingRepository } from "../repositories/listingRepository.js";
-import { toListingJson } from "./listingService.js";
+import { toAdminListingJson } from "./listingService.js";
 import type { AuditService } from "./auditService.js";
 
 export type AdminListResult = {
-  items: ListingJson[];
+  items: AdminListingJson[];
   total: number;
 };
 
@@ -46,18 +46,18 @@ export class AdminListingService {
       },
       { includeUnpublished: true },
     );
-    return { items: rows.map(toListingJson), total };
+    return { items: rows.map(toAdminListingJson), total };
   }
 
-  async getById(id: string): Promise<ListingJson> {
+  async getById(id: string): Promise<AdminListingJson> {
     const row = await this.repo.findById(id, { includeUnpublished: true });
     if (!row) {
       throw new AppError(`Listing not found: ${id}`, 404, "NOT_FOUND");
     }
-    return toListingJson(row);
+    return toAdminListingJson(row);
   }
 
-  async create(actorId: string, body: CreateListingBody): Promise<ListingJson> {
+  async create(actorId: string, body: CreateListingBody): Promise<AdminListingJson> {
     const data: Prisma.ListingCreateInput = {
       id: body.id,
       title: body.title,
@@ -90,14 +90,14 @@ export class AdminListingService {
       entityId: row.id,
       after: serializeListing(row),
     });
-    return toListingJson(row);
+    return toAdminListingJson(row);
   }
 
   async update(
     actorId: string,
     id: string,
     body: UpdateListingBody,
-  ): Promise<ListingJson> {
+  ): Promise<AdminListingJson> {
     const before = await this.repo.findById(id, { includeUnpublished: true });
     if (!before) {
       throw new AppError(`Listing not found: ${id}`, 404, "NOT_FOUND");
@@ -148,7 +148,7 @@ export class AdminListingService {
       before: serializeListing(before),
       after: serializeListing(after),
     });
-    return toListingJson(after);
+    return toAdminListingJson(after);
   }
 
   async delete(actorId: string, id: string): Promise<void> {
@@ -170,7 +170,7 @@ export class AdminListingService {
     actorId: string,
     id: string,
     status: ListingStatus,
-  ): Promise<ListingJson> {
+  ): Promise<AdminListingJson> {
     const before = await this.repo.findById(id, { includeUnpublished: true });
     if (!before) {
       throw new AppError(`Listing not found: ${id}`, 404, "NOT_FOUND");
@@ -191,7 +191,7 @@ export class AdminListingService {
       before: { status: before.status },
       after: { status },
     });
-    return toListingJson(after);
+    return toAdminListingJson(after);
   }
 
   async setOrder(
@@ -199,7 +199,7 @@ export class AdminListingService {
     id: string,
     field: "featuredOrder" | "trendingOrder",
     value: number | null,
-  ): Promise<ListingJson> {
+  ): Promise<AdminListingJson> {
     const before = await this.repo.findById(id, { includeUnpublished: true });
     if (!before) {
       throw new AppError(`Listing not found: ${id}`, 404, "NOT_FOUND");
@@ -213,7 +213,7 @@ export class AdminListingService {
       before: { [field]: before[field] },
       after: { [field]: value },
     });
-    return toListingJson(after);
+    return toAdminListingJson(after);
   }
 }
 

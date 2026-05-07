@@ -31,6 +31,20 @@ export type ListingJson = {
   tags?: string[];
 };
 
+/** Admin-only listing shape (workflow + scheduling). Public routes use `ListingJson`. */
+export type ListingStatusDto = "draft" | "published" | "archived";
+
+export type AdminListingJson = ListingJson & {
+  status: ListingStatusDto;
+  deadlineAt: string | null;
+  featuredOrder: number | null;
+  trendingOrder: number | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  authorId: string | null;
+};
+
 export type ListingsSort = "deadline" | "alpha" | "recent";
 
 export type ListListingsQuery = {
