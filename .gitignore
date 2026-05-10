@@ -13,8 +13,6 @@ jspm_packages/
 .env
 .env.*
 !.env.example
-!.env.local.example
-!.env.sample
 
 # Common secret files
 *.pem
@@ -40,9 +38,7 @@ prisma/*.db-journal
 # DO NOT ignore prisma/migrations/ — those MUST be committed.
 
 # ---------- Supabase CLI ----------
-supabase/.branches
-supabase/.temp
-supabase/.env
+# (removed - using hosted Supabase only)
 
 # ---------- Logs ----------
 logs/

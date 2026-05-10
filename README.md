@@ -7,7 +7,7 @@ Backend API for the Kytalist project.
 - **Node.js** + **TypeScript** (ESM, run via [`tsx`](https://github.com/privatenumber/tsx))
 - **Express 5** for HTTP
 - **Prisma 7** ORM with the `prisma-client` generator
-- **PostgreSQL** on **Supabase** (Supavisor pooler for runtime, direct connection for migrations)
+- **PostgreSQL** (Supabase, Neon, Railway, or any Postgres host)
 
 ## Three-tier layout
 
@@ -40,9 +40,12 @@ curl http://localhost:3001/health
 
 ## Prerequisites
 
-- Node.js **>= 20.6** (needed for native `--env-file` support and modern ESM)
-- **Local:** [Docker](https://docs.docker.com/get-docker/) (for `npx supabase start`) **or** any PostgreSQL for local-only dev
-- **Hosted:** a Supabase cloud project (or other Postgres) if you are not using the local stack
+- Node.js **>= 20.6**
+- A hosted PostgreSQL database:
+  - [Supabase](https://supabase.com) (recommended - includes auth)
+  - [Neon](https://neon.tech) (serverless Postgres)
+  - [Railway](https://railway.app) or [Render](https://render.com)
+  - Any other PostgreSQL host
 
 ## Setup
 
@@ -52,42 +55,58 @@ cd api-kytalist
 npm install
 ```
 
-### 1. Configure environment
+### 1. Create a hosted database
 
-[`.env.example`](.env.example) is pre-filled for **local development** with the same Postgres URL and Supabase API keys that `npx supabase start` uses (public demo JWTs — safe for a local stack only). Copy it to `.env` and start the local Supabase services before migrating:
+**Using Supabase (recommended):**
+1. Go to [supabase.com](https://supabase.com) and create a new project
+2. Wait for the database to provision (~2 minutes)
+3. Go to **Project Settings → Database**
+4. Copy both connection strings:
+   - **Connection pooling** (port 6543) → use for `DATABASE_URL`
+   - **Session mode** (port 5432) → use for `DIRECT_URL`
+
+**Using Neon or other providers:**
+- For Neon, get the connection string from your dashboard
+- Most providers give you a single URL - use it for both `DATABASE_URL` and `DIRECT_URL`
+
+### 2. Configure environment
+
+Copy `.env.example` to `.env` and fill in your database credentials:
 
 ```bash
 cp .env.example .env
-npx supabase start
 ```
 
-**Cloud / production:** replace `DATABASE_URL`, `DIRECT_URL`, and all `SUPABASE_*` values using your Supabase dashboard (**Project Settings → Database → Connection string** for the DB URLs). Use the **pooled** string for `DATABASE_URL` and the **direct** session string for `DIRECT_URL` in production.
-
-**Local overrides (optional):** copy [`.env.local.example`](.env.local.example) to `.env.local`. The app, Prisma CLI, and seed load **`.env` first**, then **`.env.local`** (same key in `.env.local` wins). `.env.local` is gitignored — use it for machine-only URLs or secrets without changing the shared template.
+Update `.env` with your values:
 
 ```env
-# Typical production shape (values from dashboard — do not use placeholders in real deploys)
-# DATABASE_URL=postgres://...pooler...:6543/postgres?pgbouncer=true
-# DIRECT_URL=postgres://...db...:5432/postgres
-# CORS_ORIGIN=https://your-site.com
-# DOCS_ENABLED=false
+# From your Supabase dashboard:
+DATABASE_URL=postgresql://postgres.[your-ref]:6543/postgres?pgbouncer=true
+DIRECT_URL=postgresql://postgres.[your-ref]:5432/postgres
+
+# If using Supabase Auth:
+SUPABASE_URL=https://[your-ref].supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJhbG...
+SUPABASE_JWT_SECRET=your-jwt-secret
+
+# Optional:
+PORT=3001
+CORS_ORIGIN=http://localhost:3000
+DOCS_ENABLED=true
 ```
 
-> Why two URLs? Prisma 7 + Supabase requires the pooled URL for app queries (Supavisor pgbouncer in transaction mode) and the direct URL for migrations (which need session-bound connections for advisory locks and DDL transactions). Mixing them causes `prisma migrate` to hang forever. On a dev machine with **local** Postgres you can set both to the same URL, as in `.env.example`.
+> **Why two URLs?** Prisma requires:
+> - **`DATABASE_URL`** (pooled) for runtime queries - uses connection pooling for better performance
+> - **`DIRECT_URL`** (session) for migrations - needs session-based connection for DDL operations
+> 
+> If your provider doesn't use pooling (e.g., Neon), use the same URL for both.
 
-### 2. Generate the Prisma client and apply migrations
-
-```bash
-npx prisma generate            # writes the typed client to ./generated/prisma
-npx prisma migrate deploy      # applies committed migrations to the DB
-```
-
-Use `migrate deploy` for any environment that doesn't author new migrations (CI, staging, prod, fresh clones). It only applies what's already in `prisma/migrations/`.
-
-### 3. Seed listing data (optional)
+### 3. Run migrations and seed data
 
 ```bash
-npm run db:seed
+npm run db:generate       # Generate Prisma client
+npm run db:migrate:deploy # Apply migrations to your database
+npm run db:seed          # Load sample data (optional)
 ```
 
 ## Running
@@ -106,13 +125,17 @@ The server listens on `http://localhost:${PORT}` (default `3001`).
 - Seed data in `prisma/seed-data.ts` / `prisma/seed.ts` (same ids as the Next app for `#` links).
 - `prisma.config.ts` still uses **`DIRECT_URL`** for migrations; the app uses **`DATABASE_URL`** at runtime (pooler-friendly).
 
-### Local vs production
+### Development vs Production
 
-1. **Local:** In `.env`, set `DATABASE_URL` and `DIRECT_URL` to your **local** Postgres (often the same URL for both on a dev box).
-2. Run: `npx prisma migrate dev` (or `npm run db:migrate:dev`) when you add migrations; `npm run db:seed` to load listings.
-3. **Production:** Point `DIRECT_URL` and `DATABASE_URL` at **prod**; run **`npx prisma migrate deploy`** (`npm run db:migrate:deploy`) — never point prod URLs at a local DB. Then seed if you want the same starter data.
+**Development:**
+- Create a separate Supabase project for development
+- Use `npm run db:migrate:dev` when creating new migrations
+- Seed with sample data using `npm run db:seed`
 
-`.env.example` documents `CORS_ORIGIN` (comma-separated). If it is unset, CORS uses reflective `origin: true` for local dev; in production you should set `CORS_ORIGIN` to your real site origins.
+**Production:**
+- Use `npm run db:migrate:deploy` to apply migrations
+- Set `CORS_ORIGIN` to your actual frontend URL(s) (comma-separated)
+- Set `DOCS_ENABLED=false` to disable API documentation
 
 ### Editing the schema
 
@@ -133,7 +156,7 @@ npx prisma migrate status        # what's applied vs pending
 npx prisma format                # format schema.prisma
 ```
 
-> Never run `prisma migrate dev` against production — it can reset the schema on drift. Production = `prisma migrate deploy` only.
+> ⚠️ **Never** run `prisma migrate dev` against production — it can reset data on schema drift. Always use `prisma migrate deploy` in production.
 
 ## Project structure
 
@@ -186,6 +209,6 @@ If a CLI command stalls on `... at ...:6543`, it means the CLI is hitting the po
 
 ---
 
-**Note:** Keep separate env files or swap `DATABASE_URL` / `DIRECT_URL` before running migrations or seeds so you do not hit production unintentionally. For a strict “local first” workflow, use local Postgres in `.env` until you explicitly promote to prod.
+**Best Practice:** Use separate Supabase projects (or database instances) for development and production. Never point your development environment at production data.
 
 Next steps you might take: hook the Next.js frontend to these endpoints, or add admin write APIs behind authentication.
