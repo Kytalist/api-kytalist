@@ -29,6 +29,8 @@ Entry point stays thin: `src/index.ts` loads env and listens; `createApp()` wire
 - `GET /api/v1/listings/featured` — rows with `featuredOrder` (seed matches the old `featuredListings()` order).
 - `GET /api/v1/listings/:id` — single listing; `404` + JSON error if missing.
 
+- Admin-only: `POST /api/v1/admin/uploads/listing-image` — request body: `{ filename: string, contentType: string }`. Returns a `SignedUpload` object with `{ path, uploadUrl, publicUrl, token }` which the client uses to perform the file upload. This endpoint is mounted under the admin router and requires a bearer token for an admin user.
+
 Errors use `{ error: { message, code } }` via `AppError`.
 
 ### Health check
@@ -42,7 +44,7 @@ curl http://localhost:3001/health
 
 - Node.js **>= 20.6**
 - A hosted PostgreSQL database:
-  - [Supabase](https://supabase.com) (recommended - includes auth)
+  - [Supabase](https://supabase.com) (recommended - includes auth + storage)
   - [Neon](https://neon.tech) (serverless Postgres)
   - [Railway](https://railway.app) or [Render](https://render.com)
   - Any other PostgreSQL host
@@ -84,10 +86,11 @@ Update `.env` with your values:
 DATABASE_URL=postgresql://postgres.[your-ref]:6543/postgres?pgbouncer=true
 DIRECT_URL=postgresql://postgres.[your-ref]:5432/postgres
 
-# If using Supabase Auth:
+# If using Supabase Auth + Storage:
 SUPABASE_URL=https://[your-ref].supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJhbG...
 SUPABASE_JWT_SECRET=your-jwt-secret
+SUPABASE_STORAGE_BUCKET=listing-images
 
 # Optional:
 PORT=3001
@@ -95,7 +98,13 @@ CORS_ORIGIN=http://localhost:3000
 DOCS_ENABLED=true
 ```
 
-> **Why two URLs?** Prisma requires:
+Notes on the storage bucket env var
+
+- The server looks for `SUPABASE_STORAGE_BUCKET`. If not set, the code currently defaults to `listing-images`.
+- Make sure the named bucket exists in your Supabase project's Storage panel.
+- If the bucket is private, the `publicUrl` returned by the API may not be directly accessible; you can rely on signed URLs or make the bucket public depending on your needs.
+
+> **Why two DB URLs?** Prisma requires:
 > - **`DATABASE_URL`** (pooled) for runtime queries - uses connection pooling for better performance
 > - **`DIRECT_URL`** (session) for migrations - needs session-based connection for DDL operations
 > 
@@ -118,6 +127,42 @@ npm run build    # type-check + emit declarations via tsc
 ```
 
 The server listens on `http://localhost:${PORT}` (default `3001`).
+
+## File uploads (current behavior)
+
+This project exposes an admin-only helper to create signed upload URLs for listing images:
+
+- Endpoint: `POST /api/v1/admin/uploads/listing-image`
+- Auth: requires a bearer token for an admin user (the admin router enforces role `admin`)
+- Body: `{ "filename": "photo.jpg", "contentType": "image/jpeg" }`
+- Response: `{ "path": "listings/2026/<uuid>.jpg", "uploadUrl": "...", "publicUrl": "...", "token": "..." }`
+
+Allowed content types (validated server-side):
+
+- `image/jpeg`
+- `image/png`
+- `image/webp`
+- `image/gif`
+- `image/svg+xml`
+- `image/avif`
+
+Typical usage flow:
+
+1. Admin client requests a signed upload URL from the API (`POST /api/v1/admin/uploads/listing-image`) with the filename + content type.
+2. The API creates a server-chosen path (`listings/<year>/<uuid>.<ext>`) and calls Supabase to create a one-shot signed upload URL.
+3. The client uploads the binary directly to the returned `uploadUrl` (make sure to set the same `Content-Type`). Example (from a JS client, or via `curl`):
+
+```bash
+# Request a signed upload URL (replace AUTH_TOKEN and host)
+curl -H "Authorization: Bearer AUTH_TOKEN" -H "Content-Type: application/json" \
+  -d '{"filename":"photo.jpg","contentType":"image/jpeg"}' \
+  https://api.example.com/api/v1/admin/uploads/listing-image
+
+# Upload the file to the signed URL that the API returned
+curl -X PUT --upload-file ./photo.jpg -H "Content-Type: image/jpeg" "<uploadUrl>"
+```
+
+4. The API response includes a `publicUrl` (which will be accessible if the bucket/object ACL allows it).
 
 ## Database
 
