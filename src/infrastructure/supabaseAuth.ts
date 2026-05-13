@@ -1,4 +1,4 @@
-import { jwtVerify } from "jose";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { AppError } from "../domain/AppError.js";
 
 export type SupabaseJwtPayload = {
@@ -11,30 +11,33 @@ export type SupabaseJwtPayload = {
   exp?: number;
 };
 
-let cachedSecret: Uint8Array | null = null;
+let cachedJWKS: ReturnType<typeof createRemoteJWKSet> | null = null;
 
-function getSecret(): Uint8Array {
-  if (cachedSecret) return cachedSecret;
-  const raw = process.env["SUPABASE_JWT_SECRET"];
-  if (!raw) {
+function getJWKS(): ReturnType<typeof createRemoteJWKSet> {
+  if (cachedJWKS) return cachedJWKS;
+
+  const url = process.env["SUPABASE_URL"];
+  if (!url) {
     throw new AppError(
-      "SUPABASE_JWT_SECRET is not configured",
+      "SUPABASE_URL is not configured",
       500,
       "AUTH_NOT_CONFIGURED",
     );
   }
-  cachedSecret = new TextEncoder().encode(raw);
-  return cachedSecret;
+
+  cachedJWKS = createRemoteJWKSet(
+    new URL(`${url}/auth/v1/.well-known/jwks.json`),
+  );
+  return cachedJWKS;
 }
 
-/** Verify a Supabase access JWT (HS256). Throws AppError(401) on invalid. */
+/** Verify a Supabase access JWT (ES256 via JWKS). Throws AppError(401) on invalid. */
 export async function verifyAccessToken(
   token: string,
 ): Promise<SupabaseJwtPayload> {
   try {
-    const { payload } = await jwtVerify(token, getSecret(), {
-      algorithms: ["HS256"],
-    });
+    const JWKS = getJWKS();
+    const { payload } = await jwtVerify(token, JWKS);
     if (typeof payload.sub !== "string") {
       throw new AppError("Token missing subject", 401, "INVALID_TOKEN");
     }
