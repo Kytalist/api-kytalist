@@ -32,6 +32,7 @@ import { createListingsRouter } from "./routes/listingsRoutes.js";
 import { createMeRouter } from "./routes/meRoutes.js";
 import { createMetaRouter } from "./routes/metaRoutes.js";
 import { createNewsletterRouter } from "./routes/newsletterRoutes.js";
+import { createSupabaseDemoRouter } from "./routes/supabaseDemoRoutes.js";
 import { createTestimonialsRouter } from "./routes/testimonialsRoutes.js";
 
 /** Replace `?token=...` and `&token=...` values with `***` for log safety. */
@@ -127,6 +128,12 @@ export function createApp(): express.Express {
   const docsRouter = createDocsRouter();
   if (docsRouter) {
     app.use("/api/v1/docs", docsRouter);
+  }
+
+  // Optional Supabase demo route (disabled by default)
+  const supabaseDemoRouter = createSupabaseDemoRouter();
+  if (supabaseDemoRouter) {
+    app.use("/api/v1", supabaseDemoRouter);
   }
 
   // Admin routes (protected by requireAuth + requireRole inside the router)

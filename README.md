@@ -88,6 +88,7 @@ DIRECT_URL=postgresql://postgres.[your-ref]:5432/postgres
 
 # If using Supabase Auth + Storage:
 SUPABASE_URL=https://[your-ref].supabase.co
+SUPABASE_ANON_KEY=eyJhbG...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbG...
 SUPABASE_JWT_SECRET=your-jwt-secret
 SUPABASE_STORAGE_BUCKET=listing-images
@@ -96,6 +97,7 @@ SUPABASE_STORAGE_BUCKET=listing-images
 PORT=3001
 CORS_ORIGIN=http://localhost:3000
 DOCS_ENABLED=true
+SUPABASE_DEMO_ENABLED=false
 ```
 
 Notes on the storage bucket env var
@@ -122,11 +124,27 @@ npm run db:seed          # Load sample data (optional)
 
 ```bash
 npm run dev      # tsx watch — auto-reloads on file changes
-npm start        # one-shot run
-npm run build    # type-check + emit declarations via tsc
+npm run build    # compile to dist/
+npm start        # run compiled server (dist/server.js)
 ```
 
 The server listens on `http://localhost:${PORT}` (default `3001`).
+
+## Vercel deployment
+
+This repo includes a serverless entry at `api/index.ts` and a rewrite in `vercel.json` so every request is routed through Express.
+
+1. In Vercel, set environment variables (at minimum: `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`). Add `SUPABASE_SERVICE_ROLE_KEY` if you use admin endpoints or Storage signed uploads.
+2. Deploy. Vercel runs `npm run vercel-build`, which generates the Prisma client.
+
+Requests will be available at:
+
+- `https://<your-project>.vercel.app/health`
+- `https://<your-project>.vercel.app/api/v1/...`
+
+Optional demo endpoint:
+
+- `GET /api/v1/supabase-demo` (enable by setting `SUPABASE_DEMO_ENABLED=true`)
 
 ## File uploads (current behavior)
 
