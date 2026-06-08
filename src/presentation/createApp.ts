@@ -60,7 +60,8 @@ export function createApp(): express.Express {
       },
       serializers: {
         req: (req: { method?: string; url?: string; id?: string }) => {
-          const url = typeof req.url === "string" ? scrubTokens(req.url) : req.url;
+          const url =
+            typeof req.url === "string" ? scrubTokens(req.url) : req.url;
           return { method: req.method, url, id: req.id };
         },
       },
@@ -73,13 +74,14 @@ export function createApp(): express.Express {
     ?.split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  app.use(
-    cors(
-      corsOrigins && corsOrigins.length > 0
-        ? { origin: corsOrigins }
-        : { origin: true },
-    ),
-  );
+
+  // CORS configuration: explicit in production, permissive in development
+  const corsConfig =
+    corsOrigins && corsOrigins.length > 0
+      ? { origin: corsOrigins, credentials: true }
+      : { origin: /localhost|127\.0\.0\.1/, credentials: true };
+
+  app.use(cors(corsConfig));
 
   app.use(globalLimiter);
 
