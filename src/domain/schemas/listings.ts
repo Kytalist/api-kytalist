@@ -1,16 +1,23 @@
 import { z } from "zod";
 
-export const listingCategorySchema = z.enum(["activity", "camp", "internship"]);
+export const listingCategorySchema = z.enum(["academic", "professional", "competition", "opportunity"]);
 
 export const extracurricularTypeSchema = z.enum([
-  "Competition",
+  "Olympiad",
+  "Quiz",
+  "LocalFairs",
   "Research",
-  "Program",
-  "Club",
-  "Volunteer",
-  "Leadership",
-  "Arts",
-  "STEM",
+  "WritingCompetition",
+  "Debate",
+  "Internship",
+  "Mentorship",
+  "TechContest",
+  "Hackathon",
+  "Startup",
+  "FilmArt",
+  "ExchangeProgram",
+  "Conference",
+  "MUN",
 ]);
 
 export const costOptionSchema = z.enum(["Free", "Paid", "Stipend"]);

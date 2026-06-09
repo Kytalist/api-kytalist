@@ -9,19 +9,26 @@ export type SeedListing = {
   region: string;
   description: string;
   image: string;
-  category: "activity" | "camp" | "internship";
+  category: "academic" | "professional" | "competition" | "opportunity";
   badge: string;
   footer: string;
   deadline?: string;
   type?:
-    | "Competition"
+    | "Olympiad"
+    | "Quiz"
+    | "LocalFairs"
     | "Research"
-    | "Program"
-    | "Club"
-    | "Volunteer"
-    | "Leadership"
-    | "Arts"
-    | "STEM";
+    | "WritingCompetition"
+    | "Debate"
+    | "Internship"
+    | "Mentorship"
+    | "TechContest"
+    | "Hackathon"
+    | "Startup"
+    | "FilmArt"
+    | "ExchangeProgram"
+    | "Conference"
+    | "MUN";
   cost?: "Free" | "Paid" | "Stipend";
   grades?: number[];
   tags?: string[];
@@ -39,11 +46,11 @@ export const seedListings: SeedListing[] = [
     description:
       "Design and compete with a FIRST-style robot. Mentors from local tech companies; no prior experience required.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Competition",
     footer: "Grades 9–12 · Weekly meets",
     deadline: "Sign-ups close Sep 15",
-    type: "Competition",
+    type: "TechContest",
     cost: "Free",
     grades: [9, 10, 11, 12],
     tags: ["Robotics", "Engineering", "Team"],
@@ -57,10 +64,10 @@ export const seedListings: SeedListing[] = [
     description:
       "Small-group coaching with conservatory faculty. Auditions are supportive and focus on growth, not perfection.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Music",
     footer: "All instruments welcome",
-    type: "Arts",
+    type: "FilmArt",
     cost: "Paid",
     grades: [9, 10, 11, 12],
     tags: ["Music", "Performance", "Mentorship"],
@@ -75,10 +82,9 @@ export const seedListings: SeedListing[] = [
     description:
       "Water-quality sampling, habitat restoration weekends, and a student-led climate policy forum each semester.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Service",
     footer: "Outdoor days monthly",
-    type: "Volunteer",
     cost: "Free",
     grades: [9, 10, 11, 12],
     tags: ["Environment", "Community", "Fieldwork"],
@@ -92,10 +98,9 @@ export const seedListings: SeedListing[] = [
     description:
       "Policy debate, public forum, and mock legislature tracks. Travel tournaments optional with scholarships.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Leadership",
     footer: "Beginner track available",
-    type: "Leadership",
     cost: "Free",
     grades: [9, 10, 11, 12],
     tags: ["Debate", "Public speaking", "Policy"],
@@ -109,11 +114,11 @@ export const seedListings: SeedListing[] = [
     description:
       "Prep for 23 events across biology, chemistry, physics, and engineering. Coaches run weekly practice labs.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Competition",
     footer: "Team tryouts in October",
     deadline: "Tryouts Oct 10",
-    type: "Competition",
+    type: "TechContest",
     cost: "Free",
     grades: [9, 10, 11, 12],
     tags: ["STEM", "Team", "Academic"],
@@ -127,10 +132,9 @@ export const seedListings: SeedListing[] = [
     description:
       "Research-heavy delegations, position papers, and regional conferences with college-student chairs.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Leadership",
     footer: "Conferences Nov–Apr",
-    type: "Leadership",
     cost: "Paid",
     grades: [10, 11, 12],
     tags: ["Debate", "International", "Writing"],
@@ -144,7 +148,7 @@ export const seedListings: SeedListing[] = [
     description:
       "1:1 mentorship with PhD mentors to produce an original research project or paper over 10 weeks.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Research",
     footer: "Rolling cohorts · 10 weeks",
     deadline: "Next cohort Jan 5",
@@ -162,10 +166,9 @@ export const seedListings: SeedListing[] = [
     description:
       "Weekly coding sessions in Python and web dev with peer-led projects. No experience required.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Club",
     footer: "Weekly · After school",
-    type: "Club",
     cost: "Free",
     grades: [9, 10, 11, 12],
     tags: ["Tech", "Coding", "Community"],
@@ -179,11 +182,10 @@ export const seedListings: SeedListing[] = [
     description:
       "Shadow clinicians, run family resource carts, and support child-life specialists. Training provided.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Service",
     footer: "Min. 4 hrs/week",
     deadline: "Applications open Feb 1",
-    type: "Volunteer",
     cost: "Free",
     grades: [11, 12],
     tags: ["Healthcare", "Service", "Shadowing"],
@@ -197,10 +199,10 @@ export const seedListings: SeedListing[] = [
     description:
       "Olympiad-style problem sets guided by graduate student coaches. Weekly seminars with guest speakers.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "STEM",
     footer: "Weekly · Fall + Spring",
-    type: "STEM",
+    type: "TechContest",
     cost: "Free",
     grades: [9, 10, 11, 12],
     tags: ["Math", "Academic", "Seminar"],
@@ -214,11 +216,11 @@ export const seedListings: SeedListing[] = [
     description:
       "Pitch, report, and publish features with editor mentorship. Published bylines for strong pitches.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Arts",
     footer: "Portfolio outcome",
     deadline: "Rolling pitches",
-    type: "Arts",
+    type: "FilmArt",
     cost: "Free",
     grades: [10, 11, 12],
     tags: ["Writing", "Journalism", "Remote"],
@@ -232,10 +234,9 @@ export const seedListings: SeedListing[] = [
     description:
       "Grow, harvest, and distribute produce to local pantries. Plan workshops on food systems and policy.",
     image: "/images/placeholder.svg",
-    category: "activity",
+    category: "academic",
     badge: "Service",
     footer: "Saturdays · All ages",
-    type: "Volunteer",
     cost: "Free",
     grades: [9, 10, 11, 12],
     tags: ["Environment", "Food", "Community"],
@@ -249,7 +250,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Two weeks of field work, ROV workshops, and lab time with graduate students. Housing on a small college campus.",
     image: "/images/placeholder.svg",
-    category: "camp",
+    category: "academic",
     badge: "STEM",
     footer: "Ages 15–17 · Residential",
     deadline: "Early bird Mar 1",
@@ -264,7 +265,7 @@ export const seedListings: SeedListing[] = [
     description:
       "CNC, electronics, and sustainable materials. Capstone: a community installation co-designed with a local nonprofit.",
     image: "/images/placeholder.svg",
-    category: "camp",
+    category: "academic",
     badge: "Design",
     footer: "Day camp · Lunch included",
   },
@@ -277,7 +278,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Newsroom simulations, podcast production, and mentorship from working editors. Portfolio review on the final day.",
     image: "/images/placeholder.svg",
-    category: "camp",
+    category: "academic",
     badge: "Arts",
     footer: "1-week sessions",
   },
@@ -290,7 +291,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Backpacking fundamentals, leave-no-trace ethics, and peer leadership scenarios in Rocky Mountain front country.",
     image: "/images/placeholder.svg",
-    category: "camp",
+    category: "academic",
     badge: "Outdoors",
     footer: "Scholarships available",
   },
@@ -303,7 +304,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Ship features that help residents access public data. Stack: TypeScript, React, Postgres. Pairing-heavy culture.",
     image: "/images/placeholder.svg",
-    category: "internship",
+    category: "professional",
     badge: "Tech",
     footer: "Paid · 10 weeks",
     deadline: "Applications due Feb 28",
@@ -318,7 +319,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Support clinical studies in cardiology. Training in data ethics, REDCap, and literature reviews with PI oversight.",
     image: "/images/placeholder.svg",
-    category: "internship",
+    category: "professional",
     badge: "Research",
     footer: "Rising college juniors+",
   },
@@ -331,7 +332,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Model supplier emissions, present to ops leaders, and shadow vendor audits. Excel + Python friendly team.",
     image: "/images/placeholder.svg",
-    category: "internship",
+    category: "professional",
     badge: "Business",
     footer: "Hybrid · Stipend",
     featuredOrder: 4,
@@ -345,7 +346,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Facilitate school programs, prototype interactives, and assist curators with a new youth history gallery.",
     image: "/images/placeholder.svg",
-    category: "internship",
+    category: "professional",
     badge: "Education",
     footer: "Part-time summer",
   },
@@ -358,7 +359,7 @@ export const seedListings: SeedListing[] = [
     description:
       "Site surveys, GIS support, and community outreach for residential solar pilots. OSHA-10 training provided.",
     image: "/images/placeholder.svg",
-    category: "internship",
+    category: "professional",
     badge: "Energy",
     footer: "Paid mileage",
   },

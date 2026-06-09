@@ -1,15 +1,22 @@
 /** JSON shape aligned with kytalist `Listing` (frontend). */
-export type ListingCategoryDto = "activity" | "camp" | "internship";
+export type ListingCategoryDto = "academic" | "professional" | "competition" | "opportunity";
 
 export type ExtracurricularTypeDto =
-  | "Competition"
+  | "Olympiad"
+  | "Quiz"
+  | "LocalFairs"
   | "Research"
-  | "Program"
-  | "Club"
-  | "Volunteer"
-  | "Leadership"
-  | "Arts"
-  | "STEM";
+  | "WritingCompetition"
+  | "Debate"
+  | "Internship"
+  | "Mentorship"
+  | "TechContest"
+  | "Hackathon"
+  | "Startup"
+  | "FilmArt"
+  | "ExchangeProgram"
+  | "Conference"
+  | "MUN";
 
 export type CostOptionDto = "Free" | "Paid" | "Stipend";
 

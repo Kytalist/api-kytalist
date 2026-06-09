@@ -30,20 +30,28 @@ model User {
 }
 
 enum ListingCategory {
-  activity
-  camp
-  internship
+  academic
+  professional
+  competition
+  opportunity
 }
 
 enum ExtracurricularType {
-  Competition
+  Olympiad
+  Quiz
+  LocalFairs
   Research
-  Program
-  Club
-  Volunteer
-  Leadership
-  Arts
-  STEM
+  WritingCompetition
+  Debate
+  Internship
+  Mentorship
+  TechContest
+  Hackathon
+  Startup
+  FilmArt
+  ExchangeProgram
+  Conference
+  MUN
 }
 
 enum CostOption {
