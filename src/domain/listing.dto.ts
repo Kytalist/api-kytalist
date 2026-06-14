@@ -28,6 +28,7 @@ export type ListingJson = {
   region: string;
   description: string;
   image: string;
+  eventUrl?: string;
   category: ListingCategoryDto;
   badge: string;
   footer: string;

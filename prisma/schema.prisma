@@ -75,6 +75,7 @@ model Listing {
   region      String
   description String
   image       String
+  eventUrl    String?
   category    ListingCategory
   badge       String
   footer      String

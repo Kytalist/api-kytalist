@@ -9,6 +9,7 @@ export type SeedListing = {
   region: string;
   description: string;
   image: string;
+  eventUrl?: string;
   category: "academic" | "professional" | "competition" | "opportunity";
   badge: string;
   footer: string;

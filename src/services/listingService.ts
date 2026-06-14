@@ -132,6 +132,7 @@ export function toListingJson(row: Listing): ListingJson {
     badge: row.badge,
     footer: row.footer,
   };
+  if (row.eventUrl) base.eventUrl = row.eventUrl;
   if (row.deadline) base.deadline = row.deadline;
   if (row.type) base.type = row.type;
   if (row.cost) base.cost = row.cost;

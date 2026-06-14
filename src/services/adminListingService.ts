@@ -66,6 +66,7 @@ export class AdminListingService {
       region: body.region,
       description: body.description,
       image: body.image,
+      eventUrl: body.eventUrl ?? null,
       category: body.category,
       badge: body.badge,
       footer: body.footer,
@@ -110,6 +111,7 @@ export class AdminListingService {
     if (body.region !== undefined) data.region = body.region;
     if (body.description !== undefined) data.description = body.description;
     if (body.image !== undefined) data.image = body.image;
+    if (body.eventUrl !== undefined) data.eventUrl = body.eventUrl;
     if (body.category !== undefined) data.category = body.category;
     if (body.badge !== undefined) data.badge = body.badge;
     if (body.footer !== undefined) data.footer = body.footer;
