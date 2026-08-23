@@ -23,15 +23,66 @@ Entry point stays thin: `src/index.ts` loads env and listens; `createApp()` wire
 
 ## API
 
-- `GET /health` — liveness (unchanged shape).
-- `GET /api/v1/meta` — regions, types, cost options, grades, sort options (for the frontend).
-- `GET /api/v1/listings` — query params: `category` (`activity` \| `camp` \| `internship` \| `all`), `region`, `type`, `cost`, `grade`, `q`, `sort` (`deadline` \| `alpha` \| `recent`), `limit` (1–500, default 100), `offset`.
-- `GET /api/v1/listings/featured` — rows with `featuredOrder` (seed matches the old `featuredListings()` order).
-- `GET /api/v1/listings/:id` — single listing; `404` + JSON error if missing.
+### Response envelopes
 
-- Admin-only: `POST /api/v1/admin/uploads/listing-image` — request body: `{ filename: string, contentType: string }`. Returns a `SignedUpload` object with `{ path, uploadUrl, publicUrl, token }` which the client uses to perform the file upload. This endpoint is mounted under the admin router and requires a bearer token for an admin user.
+List endpoints return:
 
-Errors use `{ error: { message, code } }` via `AppError`.
+```json
+{
+  "data": [],
+  "meta": { "total": 0, "limit": 100, "offset": 0 }
+}
+```
+
+Item endpoints return:
+
+```json
+{ "data": {} }
+```
+
+Errors use `{ "error": { "message": "...", "code": "..." } }` via `AppError`.
+
+### Public routes
+
+- `GET /health` — liveness.
+- `GET /api/v1/meta` — catalog option hints for the frontend: regions, types, cost options, grade options, and sort options.
+- `GET /api/v1/meta/counts` — category counts, cached for 60 seconds.
+- `GET /api/v1/listings` — paginated public listings.
+- `GET /api/v1/listings/featured` — rows with `featuredOrder`.
+- `GET /api/v1/listings/trending` — rows with `trendingOrder`.
+- `GET /api/v1/listings/:id` — single public listing; returns `404` if missing.
+- `GET /api/v1/testimonials` — published testimonials.
+- `POST /api/v1/newsletter/subscribe` — newsletter signup.
+- `GET /api/v1/newsletter/confirm` and `GET /api/v1/newsletter/unsubscribe` — email-token flows.
+
+`GET /api/v1/listings` query params:
+
+| Param      | Values                                                                 | Notes                                      |
+| ---------- | ---------------------------------------------------------------------- | ------------------------------------------ |
+| `category` | `academic`, `professional`, `competition`, `opportunity`, `all`         | Missing, empty, or `all` means no category filter. |
+| `region`   | any non-empty string                                                   | Missing, empty, or `All regions` means no region filter. |
+| `type`     | `Olympiad`, `Quiz`, `LocalFairs`, `Research`, `WritingCompetition`, `Debate`, `Internship`, `Mentorship`, `TechContest`, `Hackathon`, `Startup`, `FilmArt`, `ExchangeProgram`, `Conference`, `MUN` | Missing, empty, or `All` means no type filter. |
+| `cost`     | `Free`, `Paid`, `Stipend`                                              | Missing, empty, or `Any cost` means no cost filter. |
+| `grade`    | integer `9` through `12`                                               | Matches listings whose `grades` array contains the value. |
+| `q`        | text                                                                   | Searches title, org, location, description, badge, keywords, and exact type names. |
+| `sort`     | `deadline`, `alpha`, `recent`                                          | Defaults to `deadline`. |
+| `limit`    | `1` to `500`                                                           | Defaults to `100`. |
+| `offset`   | non-negative integer                                                   | Defaults to `0`. |
+
+Important frontend contract:
+
+- Public listing DTOs use camelCase, for example `eventUrl`, `deadline`, `grades`, and `tags`.
+- `GET /api/v1/meta` is a catalog hint source, not an exhaustive validation source for `region`.
+- The Next.js frontend merges `/meta` values with local fallbacks and values present in the current listing payload so valid DB rows are not hidden when metadata lags behind data.
+
+### Admin routes
+
+Admin routes are mounted under `/api/v1/admin` and require a bearer token for a Supabase user with role `admin`.
+
+- listing CRUD, publish/unpublish, stats, users, audit logs
+- testimonials management
+- newsletter subscriber management and broadcast
+- `POST /api/v1/admin/uploads/listing-image` — request body: `{ filename: string, contentType: string }`; returns `{ path, uploadUrl, publicUrl, token }` for direct client upload.
 
 ### Health check
 
