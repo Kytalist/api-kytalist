@@ -1,0 +1,36 @@
+# Dependencies — reinstalled inside the image
+node_modules/
+
+# Build output — produced inside the image
+dist/
+generated/
+
+# Environment files — secrets must never be baked into the image
+.env
+.env.*
+
+# Git metadata
+.git/
+.gitignore
+
+# Tooling / editor
+.vscode/
+.idea/
+.agents/
+
+# Logs
+*.log
+logs/
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Vercel (not needed in Docker)
+vercel.json
+api/
+
+# Misc
+.DS_Store
+*.tsbuildinfo
+README.md
