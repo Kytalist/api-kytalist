@@ -75,6 +75,6 @@ EXPOSE 3001
 # Healthcheck — Coolify can also configure this via UI, but having it here
 # means it works in plain Docker too.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://localhost:3001/health/live').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://localhost:' + (process.env.PORT || 3001) + '/health/live').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"
 
 CMD ["node", "dist/src/server.js"]
