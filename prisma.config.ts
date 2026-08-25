@@ -1,5 +1,5 @@
 import { loadEnv } from "./src/infrastructure/loadEnv.js";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 loadEnv();
 
@@ -9,6 +9,6 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DIRECT_URL"),
+    url: process.env.DIRECT_URL,
   },
 });
