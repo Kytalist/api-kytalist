@@ -32,7 +32,6 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy source (schema must arrive before prisma generate)
 COPY prisma ./prisma
 COPY src ./src
-COPY generated ./generated 2>/dev/null || true
 COPY prisma.config.ts tsconfig.json package.json ./
 
 # prisma generate writes to ./generated/prisma
@@ -65,8 +64,8 @@ COPY --from=builder /app/generated ./generated
 # Copy Prisma schema + migrations (needed for `prisma migrate deploy` at startup)
 COPY --from=builder /app/prisma ./prisma
 
-# Copy public assets if they exist
-COPY public ./public 2>/dev/null || true
+# Copy public assets
+COPY public ./public
 
 # Drop to non-root
 USER appuser
