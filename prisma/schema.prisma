@@ -178,3 +178,11 @@ model Application {
   @@index([userId])
   @@index([listingId])
 }
+
+model WaitlistEntry {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

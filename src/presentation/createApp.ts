@@ -10,6 +10,7 @@ import { SavedListingRepository } from "../repositories/savedListingRepository.j
 import { SubscriberRepository } from "../repositories/subscriberRepository.js";
 import { TestimonialRepository } from "../repositories/testimonialRepository.js";
 import { UserRepository } from "../repositories/userRepository.js";
+import { WaitlistRepository } from "../repositories/waitlistRepository.js";
 import { AdminListingService } from "../services/adminListingService.js";
 import { ApplicationService } from "../services/applicationService.js";
 import { AuditService } from "../services/auditService.js";
@@ -21,6 +22,7 @@ import { SavedListingService } from "../services/savedListingService.js";
 import { StatsService } from "../services/statsService.js";
 import { TestimonialService } from "../services/testimonialService.js";
 import { UserService } from "../services/userService.js";
+import { WaitlistService } from "../services/waitlistService.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { authLimiter, globalLimiter } from "./middleware/rateLimit.js";
 import { requestId } from "./middleware/requestId.js";
@@ -34,6 +36,7 @@ import { createMetaRouter } from "./routes/metaRoutes.js";
 import { createNewsletterRouter } from "./routes/newsletterRoutes.js";
 import { createSupabaseDemoRouter } from "./routes/supabaseDemoRoutes.js";
 import { createTestimonialsRouter } from "./routes/testimonialsRoutes.js";
+import { createWaitlistRouter } from "./routes/waitlistRoutes.js";
 
 /** Replace `?token=...` and `&token=...` values with `***` for log safety. */
 function scrubTokens(url: string): string {
@@ -93,6 +96,7 @@ export function createApp(): express.Express {
   const testimonialRepository = new TestimonialRepository();
   const savedListingRepository = new SavedListingRepository();
   const applicationRepository = new ApplicationRepository();
+  const waitlistRepository = new WaitlistRepository();
 
   // Services
   const auditService = new AuditService(auditRepository);
@@ -109,6 +113,7 @@ export function createApp(): express.Express {
   const testimonialService = new TestimonialService(testimonialRepository);
   const savedListingService = new SavedListingService(savedListingRepository);
   const applicationService = new ApplicationService(applicationRepository);
+  const waitlistService = new WaitlistService(waitlistRepository);
 
   // Public + auth routes
   app.use(createHealthRouter());
@@ -116,6 +121,7 @@ export function createApp(): express.Express {
   app.use("/api/v1/listings", createListingsRouter(listingService));
   app.use("/api/v1/auth", authLimiter, createAuthRouter(authService));
   app.use("/api/v1/newsletter", createNewsletterRouter(newsletterService));
+  app.use("/api/v1/waitlist", createWaitlistRouter(waitlistService));
   app.use("/api/v1/testimonials", createTestimonialsRouter(testimonialService));
   app.use(
     "/api/v1/me",
