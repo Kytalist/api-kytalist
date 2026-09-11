@@ -43,6 +43,7 @@ async function main(): Promise<void> {
           tags: row.tags ?? [],
           keywords,
           deadlineAt: row.deadlineAt ?? null,
+          eventUrl: row.eventUrl ?? null,
           featured: row.featured ?? false,
         },
         update: {
@@ -62,6 +63,7 @@ async function main(): Promise<void> {
           tags: row.tags ?? [],
           keywords,
           deadlineAt: row.deadlineAt ?? null,
+          eventUrl: row.eventUrl ?? null,
           featured: row.featured ?? false,
         },
       });
