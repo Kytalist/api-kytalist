@@ -115,18 +115,6 @@ export function createListingsAdminRouter(
   );
 
   r.post(
-    "/:id/feature",
-    validate({ params: idParamSchema, body: orderBodySchema }),
-    asyncHandler(async (req, res) => {
-      const actorId = requireUserId(req);
-      const { id } = getValidatedParams<{ id: string }>(req);
-      const { order } = req.body as { order: number | null };
-      const data = await service.setOrder(actorId, id, "featuredOrder", order);
-      ok(res, data);
-    }),
-  );
-
-  r.post(
     "/:id/trending",
     validate({ params: idParamSchema, body: orderBodySchema }),
     asyncHandler(async (req, res) => {

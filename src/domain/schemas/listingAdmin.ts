@@ -28,7 +28,7 @@ const baseListingFields = {
     .datetime({ offset: true })
     .nullable()
     .optional(),
-  featuredOrder: z.number().int().nullable().optional(),
+  featured: z.boolean().default(false),
   trendingOrder: z.number().int().nullable().optional(),
   status: listingStatusSchema.default("draft"),
 };
@@ -58,7 +58,7 @@ export const updateListingBodySchema = z
     grades: baseListingFields.grades.optional(),
     tags: baseListingFields.tags.optional(),
     deadlineAt: baseListingFields.deadlineAt,
-    featuredOrder: baseListingFields.featuredOrder,
+    featured: z.boolean().optional(),
     trendingOrder: baseListingFields.trendingOrder,
     status: listingStatusSchema.optional(),
   })

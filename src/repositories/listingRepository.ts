@@ -48,12 +48,12 @@ export class ListingRepository {
 
   async findFeatured(options: RepoOptions = {}): Promise<Listing[]> {
     const where = applyStatusFilter(
-      { featuredOrder: { not: null } },
+      { featured: true },
       options.includeUnpublished,
     );
     return getPrisma().listing.findMany({
       where,
-      orderBy: { featuredOrder: "asc" },
+      orderBy: { createdAt: "desc" },
     });
   }
 

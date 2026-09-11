@@ -34,7 +34,7 @@ export type SeedListing = {
   grades?: number[];
   tags?: string[];
   deadlineAt?: Date;
-  featuredOrder?: number;
+  featured?: boolean;
 };
 
 export const seedListings: SeedListing[] = [
@@ -72,7 +72,7 @@ export const seedListings: SeedListing[] = [
     cost: "Paid",
     grades: [9, 10, 11, 12],
     tags: ["Music", "Performance", "Mentorship"],
-    featuredOrder: 3,
+    featured: true,
   },
   {
     id: "a3",
@@ -255,7 +255,7 @@ export const seedListings: SeedListing[] = [
     badge: "STEM",
     footer: "Ages 15–17 · Residential",
     deadline: "Early bird Mar 1",
-    featuredOrder: 2,
+    featured: true,
   },
   {
     id: "c2",
@@ -309,7 +309,7 @@ export const seedListings: SeedListing[] = [
     badge: "Tech",
     footer: "Paid · 10 weeks",
     deadline: "Applications due Feb 28",
-    featuredOrder: 1,
+    featured: true,
   },
   {
     id: "i2",
@@ -336,7 +336,7 @@ export const seedListings: SeedListing[] = [
     category: "professional",
     badge: "Business",
     footer: "Hybrid · Stipend",
-    featuredOrder: 4,
+    featured: true,
   },
   {
     id: "i4",

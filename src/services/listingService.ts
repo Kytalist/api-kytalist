@@ -147,7 +147,7 @@ export function toAdminListingJson(row: Listing): AdminListingJson {
     ...base,
     status: row.status as AdminListingJson["status"],
     deadlineAt: row.deadlineAt?.toISOString() ?? null,
-    featuredOrder: row.featuredOrder ?? null,
+    featured: row.featured,
     trendingOrder: row.trendingOrder ?? null,
     publishedAt: row.publishedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),

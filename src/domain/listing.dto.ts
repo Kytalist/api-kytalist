@@ -45,7 +45,7 @@ export type ListingStatusDto = "draft" | "published" | "archived";
 export type AdminListingJson = ListingJson & {
   status: ListingStatusDto;
   deadlineAt: string | null;
-  featuredOrder: number | null;
+  featured: boolean;
   trendingOrder: number | null;
   publishedAt: string | null;
   createdAt: string;

@@ -21,7 +21,7 @@ import {
   createTestimonialBodySchema,
   updateTestimonialBodySchema,
 } from "../domain/schemas/testimonials.js";
-import { listingImageUploadBodySchema } from "../domain/schemas/uploads.js";
+import { imageUploadBodySchema } from "../domain/schemas/uploads.js";
 import { userRoleSchema } from "../domain/schemas/userAdmin.js";
 
 export function buildOpenApiDocument(): unknown {
@@ -291,7 +291,21 @@ export function buildOpenApiDocument(): unknown {
     request: {
       body: {
         content: {
-          "application/json": { schema: listingImageUploadBodySchema },
+          "application/json": { schema: imageUploadBodySchema },
+        },
+      },
+    },
+    responses: { 200: { description: "OK" } },
+  });
+
+  registry.registerPath({
+    method: "post",
+    path: "/api/v1/admin/uploads/testimonial-avatar",
+    security: [{ bearerAuth: [] }],
+    request: {
+      body: {
+        content: {
+          "application/json": { schema: imageUploadBodySchema },
         },
       },
     },

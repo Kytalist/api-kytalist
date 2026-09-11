@@ -77,7 +77,7 @@ export class AdminListingService {
       tags: body.tags,
       keywords: keywordsFrom(body.tags),
       deadlineAt: body.deadlineAt ? new Date(body.deadlineAt) : null,
-      featuredOrder: body.featuredOrder ?? null,
+      featured: body.featured ?? false,
       trendingOrder: body.trendingOrder ?? null,
       status: body.status,
       publishedAt: body.status === ListingStatus.published ? new Date() : null,
@@ -129,7 +129,7 @@ export class AdminListingService {
     if (body.deadlineAt !== undefined) {
       data.deadlineAt = body.deadlineAt ? new Date(body.deadlineAt) : null;
     }
-    if (body.featuredOrder !== undefined) data.featuredOrder = body.featuredOrder;
+    if (body.featured !== undefined) data.featured = body.featured;
     if (body.trendingOrder !== undefined) data.trendingOrder = body.trendingOrder;
     if (body.status !== undefined) {
       data.status = body.status;
@@ -199,7 +199,7 @@ export class AdminListingService {
   async setOrder(
     actorId: string,
     id: string,
-    field: "featuredOrder" | "trendingOrder",
+    field: "trendingOrder",
     value: number | null,
   ): Promise<AdminListingJson> {
     const before = await this.repo.findById(id, { includeUnpublished: true });

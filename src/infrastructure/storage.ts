@@ -41,9 +41,10 @@ function extFor(filename: string, contentType: string): string {
  * Returns a one-shot signed upload URL for the listing-images bucket.
  * Server picks the storage path so clients can't overwrite arbitrary objects.
  */
-export async function createListingImageUploadUrl(args: {
+async function createImageUploadUrl(args: {
   filename: string;
   contentType: string;
+  scope: string;
 }): Promise<SignedUpload> {
   if (!ALLOWED_CONTENT_TYPES.has(args.contentType)) {
     throw new AppError(
@@ -55,7 +56,7 @@ export async function createListingImageUploadUrl(args: {
 
   const supa = getSupabaseAdmin();
   const ext = extFor(args.filename, args.contentType);
-  const path = `listings/${new Date().getFullYear()}/${randomUUID()}.${ext}`;
+  const path = `${args.scope}/${new Date().getFullYear()}/${randomUUID()}.${ext}`;
 
   const { data, error } = await supa.storage
     .from(bucket())
@@ -77,4 +78,18 @@ export async function createListingImageUploadUrl(args: {
     token: data.token,
     publicUrl: pub.publicUrl,
   };
+}
+
+export function createListingImageUploadUrl(args: {
+  filename: string;
+  contentType: string;
+}): Promise<SignedUpload> {
+  return createImageUploadUrl({ ...args, scope: "listings" });
+}
+
+export function createTestimonialAvatarUploadUrl(args: {
+  filename: string;
+  contentType: string;
+}): Promise<SignedUpload> {
+  return createImageUploadUrl({ ...args, scope: "testimonials" });
 }

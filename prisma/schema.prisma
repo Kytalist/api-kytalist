@@ -89,7 +89,8 @@ model Listing {
   keywords    String                 @default("")
   /// Optional real deadline for sorting; display may still use `deadline` text.
   deadlineAt  DateTime?
-  featuredOrder Int?                 @unique
+  /// Admin-marked spotlight for the homepage featured section.
+  featured      Boolean              @default(false)
   trendingOrder Int?                 @unique
   status        ListingStatus        @default(published)
   publishedAt   DateTime?
