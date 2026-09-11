@@ -14,6 +14,7 @@ ARG NODE_VERSION=22
 FROM node:${NODE_VERSION}-alpine AS deps
 
 WORKDIR /app
+ENV NODE_ENV=development
 
 # Only copy manifests first so this layer is cached until they change
 COPY package.json package-lock.json ./
@@ -25,6 +26,7 @@ RUN npm ci
 FROM node:${NODE_VERSION}-alpine AS builder
 
 WORKDIR /app
+ENV NODE_ENV=development
 
 # Bring in node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
