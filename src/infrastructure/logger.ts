@@ -8,28 +8,35 @@ export function getLogger(): Logger {
   const level = process.env["LOG_LEVEL"] ?? "info";
   const isProd = process.env["NODE_ENV"] === "production";
 
-  logger = pino({
-    level,
-    redact: {
-      paths: [
-        "req.headers.authorization",
-        "req.headers.cookie",
-        "*.password",
-        "*.passwordHash",
-        "*.token",
-        "*.confirmToken",
-        "*.unsubToken",
-      ],
-      remove: true,
-    },
-    ...(isProd
-      ? {}
-      : {
-          transport: {
-            target: "pino-pretty",
-            options: { colorize: true, translateTime: "HH:MM:ss.l" },
-          },
-        }),
-  });
+  const redact = {
+    paths: [
+      "req.headers.authorization",
+      "req.headers.cookie",
+      "*.password",
+      "*.passwordHash",
+      "*.token",
+      "*.confirmToken",
+      "*.unsubToken",
+    ],
+    remove: true,
+  };
+
+  if (!isProd) {
+    try {
+      logger = pino({
+        level,
+        redact,
+        transport: {
+          target: "pino-pretty",
+          options: { colorize: true, translateTime: "HH:MM:ss.l" },
+        },
+      });
+      return logger;
+    } catch {
+      // pino-pretty not available (e.g. production image with NODE_ENV mismatch)
+    }
+  }
+
+  logger = pino({ level, redact });
   return logger;
 }
