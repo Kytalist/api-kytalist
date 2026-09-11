@@ -80,11 +80,21 @@ export function createApp(): express.Express {
     .map((s) => s.trim())
     .filter(Boolean);
 
+  // Allow Vercel preview deployments of this project (e.g. `kytalist-pcbu`,
+  // `kytalist-git-dev-user`) so branch deploys can reach the API without
+  // editing CORS_ORIGIN for every preview URL.
+  const VERCEL_PREVIEW_ORIGIN =
+    /^https:\/\/kytalist(?:-[a-z0-9.-]+)?\.vercel\.app$/i;
+  const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
   // CORS configuration: explicit in production, permissive in development
   const corsConfig =
     corsOrigins && corsOrigins.length > 0
-      ? { origin: corsOrigins, credentials: true }
-      : { origin: /localhost|127\.0\.0\.1/, credentials: true };
+      ? {
+          origin: [...corsOrigins, VERCEL_PREVIEW_ORIGIN],
+          credentials: true,
+        }
+      : { origin: LOCAL_ORIGIN, credentials: true };
 
   app.use(cors(corsConfig));
 
