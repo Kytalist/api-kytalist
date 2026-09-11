@@ -3,30 +3,17 @@ import { getLogger } from "./logger.js";
 
 const log = getLogger();
 
-/** Milliseconds from now until the next occurrence of `hourUtc:00:00` UTC. */
-export function msUntilNextUtcHour(hourUtc: number): number {
-  const now = new Date();
-  const next = new Date(
-    Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate(),
-      hourUtc,
-      0,
-      0,
-      0,
-    ),
-  );
-  if (next.getTime() <= now.getTime()) {
-    next.setUTCDate(next.getUTCDate() + 1);
-  }
-  return next.getTime() - now.getTime();
+/** Sync interval in minutes (default 60 = hourly, floor 5 to respect the API). */
+function intervalMinutes(): number {
+  const raw = Number(process.env["CONTEST_SYNC_INTERVAL_MINUTES"] ?? 60);
+  if (!Number.isFinite(raw) || raw <= 0) return 60;
+  return Math.max(5, Math.floor(raw));
 }
 
 /**
- * Runs the contest sync daily at the configured UTC hour (default 00:00) and
- * seeds an empty catalog on boot. Long-lived process only (server.ts) — never
- * started from the serverless entrypoint (index.ts).
+ * Runs the contest sync on a fixed interval (default hourly) and seeds an empty
+ * catalog on boot. Long-lived process only (server.ts) — never started from the
+ * serverless entrypoint (index.ts).
  */
 export function startContestScheduler(sync: ContestSyncService): void {
   if (process.env["CONTEST_SYNC_ENABLED"] === "false") {
@@ -34,8 +21,8 @@ export function startContestScheduler(sync: ContestSyncService): void {
     return;
   }
 
-  const configured = Number(process.env["CONTEST_SYNC_HOUR_UTC"] ?? 0);
-  const hour = Number.isFinite(configured) ? configured : 0;
+  const minutes = intervalMinutes();
+  const everyMs = minutes * 60 * 1000;
 
   const run = async (): Promise<void> => {
     try {
@@ -47,14 +34,13 @@ export function startContestScheduler(sync: ContestSyncService): void {
   };
 
   const schedule = (): void => {
-    const delay = msUntilNextUtcHour(hour);
     setTimeout(() => {
       void run().finally(schedule);
-    }, delay).unref();
+    }, everyMs).unref();
   };
 
   schedule();
-  log.info({ hourUtc: hour }, "contest sync: scheduler started");
+  log.info({ intervalMinutes: minutes }, "contest sync: scheduler started");
 
   void sync
     .ensureSeeded()
