@@ -9,7 +9,6 @@ export type TestimonialJson = {
   quote: string;
   avatar: string | null;
   published: boolean;
-  order: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -20,7 +19,6 @@ export type CreateTestimonialBody = {
   quote: string;
   avatar?: string | null | undefined;
   published?: boolean | undefined;
-  order?: number | null | undefined;
 };
 
 export type UpdateTestimonialBody = {
@@ -29,7 +27,6 @@ export type UpdateTestimonialBody = {
   quote?: string | undefined;
   avatar?: string | null | undefined;
   published?: boolean | undefined;
-  order?: number | null | undefined;
 };
 
 function toJson(t: Testimonial): TestimonialJson {
@@ -40,7 +37,6 @@ function toJson(t: Testimonial): TestimonialJson {
     quote: t.quote,
     avatar: t.avatar,
     published: t.published,
-    order: t.order,
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt.toISOString(),
   };
@@ -66,7 +62,6 @@ export class TestimonialService {
       quote: body.quote,
       avatar: body.avatar ?? null,
       published: body.published ?? false,
-      order: body.order ?? null,
     });
     return toJson(row);
   }
@@ -85,7 +80,6 @@ export class TestimonialService {
     if (body.quote !== undefined) data.quote = body.quote;
     if (body.avatar !== undefined) data.avatar = body.avatar;
     if (body.published !== undefined) data.published = body.published;
-    if (body.order !== undefined) data.order = body.order;
     const after = await this.repo.update(id, data);
     return toJson(after);
   }

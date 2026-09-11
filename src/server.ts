@@ -1,4 +1,6 @@
 import app from "./index.js";
+import { startContestScheduler } from "./infrastructure/contestScheduler.js";
+import { getContestSyncService } from "./infrastructure/contestRuntime.js";
 import { getLogger } from "./infrastructure/logger.js";
 import { disconnectPrisma } from "./infrastructure/prisma.js";
 
@@ -8,6 +10,8 @@ const PORT = Number(process.env["PORT"] ?? 3001);
 const server = app.listen(PORT, () => {
   log.info({ port: PORT }, `api-kytalist listening on http://localhost:${PORT}`);
 });
+
+startContestScheduler(getContestSyncService());
 
 async function shutdown(signal: string): Promise<void> {
   log.info({ signal }, "Shutting down");

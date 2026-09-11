@@ -5,13 +5,13 @@ export class TestimonialRepository {
   async findPublished(): Promise<Testimonial[]> {
     return getPrisma().testimonial.findMany({
       where: { published: true },
-      orderBy: [{ order: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }],
+      orderBy: { createdAt: "desc" },
     });
   }
 
   async findManyForAdmin(): Promise<Testimonial[]> {
     return getPrisma().testimonial.findMany({
-      orderBy: [{ order: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
+      orderBy: { createdAt: "desc" },
     });
   }
 

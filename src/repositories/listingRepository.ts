@@ -72,6 +72,34 @@ export class ListingRepository {
     return getPrisma().listing.create({ data });
   }
 
+  async upsertById(
+    id: string,
+    create: Prisma.ListingUncheckedCreateInput,
+    update: Prisma.ListingUncheckedUpdateInput,
+  ): Promise<Listing> {
+    return getPrisma().listing.upsert({ where: { id }, create, update });
+  }
+
+  /** Prunes ingested contests whose end (or start) is in the past. */
+  async deleteExpiredContests(now: Date): Promise<number> {
+    const res = await getPrisma().listing.deleteMany({
+      where: {
+        source: "clist",
+        OR: [
+          { endsAt: { lt: now } },
+          { endsAt: null, deadlineAt: { lt: now } },
+        ],
+      },
+    });
+    return res.count;
+  }
+
+  async countUpcomingContests(now: Date): Promise<number> {
+    return getPrisma().listing.count({
+      where: { source: "clist", endsAt: { gt: now } },
+    });
+  }
+
   async update(id: string, data: Prisma.ListingUpdateInput): Promise<Listing> {
     return getPrisma().listing.update({ where: { id }, data });
   }

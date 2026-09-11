@@ -2,6 +2,7 @@ import cors from "cors";
 import express, { type RequestHandler } from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
+import { getContestSyncService } from "../infrastructure/contestRuntime.js";
 import { getLogger } from "../infrastructure/logger.js";
 import { ApplicationRepository } from "../repositories/applicationRepository.js";
 import { AuditRepository } from "../repositories/auditRepository.js";
@@ -28,6 +29,7 @@ import { authLimiter, globalLimiter } from "./middleware/rateLimit.js";
 import { requestId } from "./middleware/requestId.js";
 import { createAdminRouter } from "./routes/admin/index.js";
 import { createAuthRouter } from "./routes/authRoutes.js";
+import { createContestsInternalRouter } from "./routes/contestsInternalRoutes.js";
 import { createDocsRouter } from "./routes/docsRoutes.js";
 import { createHealthRouter } from "./routes/healthRoutes.js";
 import { createListingsRouter } from "./routes/listingsRoutes.js";
@@ -123,6 +125,10 @@ export function createApp(): express.Express {
   app.use("/api/v1/newsletter", createNewsletterRouter(newsletterService));
   app.use("/api/v1/waitlist", createWaitlistRouter(waitlistService));
   app.use("/api/v1/testimonials", createTestimonialsRouter(testimonialService));
+  app.use(
+    "/api/v1/internal/contests",
+    createContestsInternalRouter(getContestSyncService()),
+  );
   app.use(
     "/api/v1/me",
     createMeRouter({

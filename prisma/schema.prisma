@@ -89,6 +89,10 @@ model Listing {
   keywords    String                 @default("")
   /// Optional real deadline for sorting; display may still use `deadline` text.
   deadlineAt  DateTime?
+  /// Origin of the row: "clist" for ingested contests, null for admin-authored.
+  source        String?
+  /// When an ingested contest ends — used to prune expired rows on sync.
+  endsAt        DateTime?
   /// Admin-marked spotlight for the homepage featured section.
   featured      Boolean              @default(false)
   trendingOrder Int?                 @unique
@@ -107,6 +111,7 @@ model Listing {
   @@index([createdAt])
   @@index([status])
   @@index([trendingOrder])
+  @@index([source, endsAt])
 }
 
 model AuditLog {
@@ -145,11 +150,10 @@ model Testimonial {
   quote     String
   avatar    String?
   published Boolean  @default(false)
-  order     Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([published, order])
+  @@index([published, createdAt])
 }
 
 model SavedListing {

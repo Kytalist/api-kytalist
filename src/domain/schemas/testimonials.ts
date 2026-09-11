@@ -7,7 +7,6 @@ export const createTestimonialBodySchema = z
     quote: z.string().min(1).max(2000),
     avatar: z.string().max(500).nullable().optional(),
     published: z.boolean().optional(),
-    order: z.number().int().nullable().optional(),
   })
   .strip();
 
@@ -18,7 +17,6 @@ export const updateTestimonialBodySchema = z
     quote: z.string().min(1).max(2000).optional(),
     avatar: z.string().max(500).nullable().optional(),
     published: z.boolean().optional(),
-    order: z.number().int().nullable().optional(),
   })
   .strip();
 
