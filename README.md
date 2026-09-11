@@ -326,3 +326,4 @@ If a CLI command stalls on `... at ...:6543`, it means the CLI is hitting the po
 **Best Practice:** Use separate Supabase projects (or database instances) for development and production. Never point your development environment at production data.
 
 Next steps you might take: hook the Next.js frontend to these endpoints, or add admin write APIs behind authentication.
+# test auto-deploy
